@@ -41,13 +41,18 @@ class DataBase:
             port="5432"
         )
         self.cursor = self.conn.cursor()
+        
+    def __is_empty(self, table: str):
+        q = f"SELECT NOT EXISTS (SELECT 1 FROM {table} LIMIT 1);"
+        self.cursor.execute(q)
+        result = self.cursor.fetchone()
+        return result[0] if result else True
     
     
 
 class DataBaseCreator:
     def __init__(self, db: DataBase):
         self.db = db
-    
         
     def create_test_table(self):
         q = f"""
@@ -59,13 +64,6 @@ class DataBaseCreator:
         );
         """
         
-        self.db.cursor.execute(q)
-        self.db.conn.commit()
-        
-    def delete_database(self):
-        q = f"""
-        DROP TABLE {self.db.test_table};
-        """
         self.db.cursor.execute(q)
         self.db.conn.commit()
     
