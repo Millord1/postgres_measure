@@ -1,0 +1,11 @@
+from time import perf_counter
+
+class Counter:
+    def __enter__(self):
+        self.start = perf_counter()
+        return self;
+    
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.end = perf_counter()
+        self.elapsed = self.end - self.start
+        return self.elapsed
