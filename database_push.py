@@ -5,6 +5,5 @@ class DatabasePusher:
     def __init__(self, db: DataBase):
         self.db = db
         
-    def push_thousand(self):
-        data = seed(1000)
+    def push_naive_version(self, data: list[tuple]):
         
