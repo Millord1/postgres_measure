@@ -1,16 +1,12 @@
-from dotenv import load_dotenv
 from database import DataBase, DataBaseCreator
 from perf_counter import Counter
 from database_push import DatabasePusher
 from seeder import Seeder
-import os
-import time
+from pathlib import Path
 
-load_dotenv()
-
-PW = os.getenv('PW')
-USER = os.getenv('USER')
-DB_NAME = os.getenv('DB_NAME')
+PW = "Millord!"
+USER = "postgres"
+DB_NAME = "test"
 
 def main():
     
@@ -22,10 +18,18 @@ def main():
     seeder = Seeder()
     thousand_data = seeder.create_thousand()
     
-    with Counter() as count:
-        db_pusher.push_naive_version(thousand_data)   
+    times = []
+    
+    for _ in range(0,9):
+        with Counter() as count:
+            db_pusher.push_naive_version(thousand_data)   
+        times.append(count.elapsed)
+    
+    filepath = Path("data/thousand_naive.txt")
+    filepath.parent.mkdir(parents=True, exist_ok=True)
+    filepath.write_text("\n".join(map(str, times)), encoding="utf-8")
         
-    print(count.elapsed)
+    print(times)
     
     
 main()

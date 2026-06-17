@@ -3,7 +3,7 @@ import random
 
 class Seeder:
     
-    def __seed(nb: int) -> list[tuple]:
+    def __seed(self, nb: int) -> list[tuple]:
         if not isinstance(nb, int):
             raise ValueError("nb must be a number")
         

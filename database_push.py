@@ -1,5 +1,4 @@
 from database import DataBase
-from seeder import seed
 
 class DatabasePusher:
     def __init__(self, db: DataBase):
@@ -10,7 +9,9 @@ class DatabasePusher:
             self.db.cursor.execute(f"""
                 INSERT INTO {self.db.test_table} 
                 (number, texte, date, decimal) 
-                VALUES (?,?,?,?)
+                VALUES (%s,%s,%s,%s)
             """,item)
             self.db.conn.commit()
                
+    # def push_unique_transac(self, data: list[tuple]):
+        

@@ -57,9 +57,9 @@ class DataBaseCreator:
     def create_test_table(self):
         q = f"""
         CREATE TABLE IF NOT EXISTS {self.db.test_table} (
-            number INTEGER
+            number INTEGER,
             texte TEXT,
-            date DATETIME,
+            date TIMESTAMP,
             decimal FLOAT
         );
         """
