@@ -1,3 +1,5 @@
 psycopg2-binary>=2.9.9
 Faker >= 40.0.0
 python-dotenv>=1.2.2
+sqlalchemy>=2.0.51
+pandas>=3.0.3
