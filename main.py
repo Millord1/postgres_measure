@@ -2,7 +2,6 @@ from database import DataBase, DataBaseCreator
 from perf_counter import Counter
 from database_push import DatabasePusher
 from seeder import Seeder
-from pathlib import Path
 
 PW = "Millord!"
 USER = "postgres"
@@ -20,18 +19,10 @@ ht_data = seeder.create_hundred_thousand()
 million_data = seeder.create_million()
 
 def main():
-    push_naives()
-    push_batches()
-        
-    
-def push_batches():
+    push_thousand_naive()
+    push_thousand_naive_transaction()    
     push_execute_many()
     push_execute_batches()
-    
-    
-def push_naives():
-    push_thousand_naive()
-    push_thousand_naive_transaction()
 
 
 def push_thousand_naive():
@@ -119,5 +110,43 @@ def push_execute_batches():
             db_pusher.push_execute_batch_version(million_data, page_size=10000)
         times_1m.append(count.elapsed)
     db.save_times_to_db("Execute_batch 1M (page_size=10000)", times_1m)
+    
+    
+def push_execute_values():
+    print("Execute_values 1k (page_size=100)")
+    times_1k = []
+    db.reset_table()
+    for _ in range(10):
+        with Counter() as count:
+            db_pusher.push_execute_values_version(thousand_data, page_size=100)
+        times_1k.append(count.elapsed)
+    db.save_times_to_db("Execute_values 1k (page_size=100)", times_1k)
+
+    print("Execute_values 100k (page_size=1000)")
+    times_100k_moyen = []
+    db.reset_table()
+    for _ in range(10):
+        with Counter() as count:
+            db_pusher.push_execute_values_version(ht_data, page_size=1000)
+        times_100k_moyen.append(count.elapsed)
+    db.save_times_to_db("Execute_values 100k (ps: 1000)", times_100k_moyen)
+
+    print("Execute_values 100k (page_size=10000)")
+    times_100k_gros = []
+    db.reset_table()
+    for _ in range(10):
+        with Counter() as count:
+            db_pusher.push_execute_values_version(ht_data, page_size=10000)
+        times_100k_gros.append(count.elapsed)
+    db.save_times_to_db("Execute_values 100k (ps: 10000)", times_100k_gros)
+
+    print("Execute_values 1M (page_size=10000)")
+    times_1m = []
+    db.reset_table()
+    for _ in range(10):
+        with Counter() as count:
+            db_pusher.push_execute_values_version(million_data, page_size=10000)
+        times_1m.append(count.elapsed)
+    db.save_times_to_db("Execute_values 1M (page_size=10000)", times_1m)
     
 main()
