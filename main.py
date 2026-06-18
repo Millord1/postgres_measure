@@ -17,11 +17,8 @@ db_config = {
     "port": int(os.environ.get("DB_PORT", 5432)),
     "dbname": os.environ.get("DB_NAME"),
     "user": os.environ.get("DB_USER"),
-    "password": os.environ.get("PW"),
+    "password": os.environ.get("DB_PASSWORD"),
 }
-
-if not all([db_config["dbname"], db_config["user"], db_config["password"]]):
-    raise ValueError()
 
 db = DataBase(db_config)
 db_creator = DataBaseCreator(db)
