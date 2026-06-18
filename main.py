@@ -10,7 +10,7 @@ DB_NAME = "test"
 
 db = DataBase(DB_NAME, USER, PW)
 db_creator = DataBaseCreator(db)
-db_creator.create_test_table()
+db_creator.create_all_tables()
 
 db_pusher= DatabasePusher(db)
 seeder = Seeder()
@@ -33,26 +33,22 @@ def push_naives():
     push_thousand_naive()
     push_thousand_naive_transaction()
 
-    
 def push_thousand_naive():
     times = []
-    for _ in range(0,9):
+    db.reset_table()
+    for _ in range(0, 10):
         with Counter() as count:
             db_pusher.push_naive_version(thousand_data)   
         times.append(count.elapsed)
-    write_file("data/thousand_naive.txt", times)
+    db.save_times_to_db('thousand_naive', times)
     
 def push_thousand_naive_transaction():
     times = []
-    for _ in range(0,9):
+    db.reset_table()
+    for _ in range(0, 10):
         with Counter() as count:
             db_pusher.push_naive_version(thousand_data)   
         times.append(count.elapsed)
-    write_file("data/thousand_unique_tx.txt", times)
-
-def write_file(name: str, content):
-    filepath = Path(name)
-    filepath.parent.mkdir(parents=True, exist_ok=True)
-    filepath.write_text("\n".join(map(str, content)), encoding="utf-8")
+    db.save_times_to_db('thousand_unique', times)
     
 main()

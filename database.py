@@ -3,6 +3,8 @@ import psycopg2
 class DataBase:
     
     test_table = "test"
+    time_table = "time"
+    push_type_table = "push_type"
     
     def __init__(self, db_name: str, user: str, pw: str):
         self.db_name = db_name
@@ -42,19 +44,49 @@ class DataBase:
         )
         self.cursor = self.conn.cursor()
         
-    def __is_empty(self, table: str):
-        q = f"SELECT NOT EXISTS (SELECT 1 FROM {table} LIMIT 1);"
-        self.cursor.execute(q)
-        result = self.cursor.fetchone()
-        return result[0] if result else True
+    def reset_table(self):
+        self.cursor.execute(f"TRUNCATE TABLE {self.test_table};")
+        self.conn.commit()
     
+    
+    def save_times_to_db(self, method_name: str, times: list[float]):
+        try:
+            q_push_type = f"""
+                INSERT INTO {self.push_type_table} (name) 
+                VALUES (%s)
+                ON CONFLICT (name) DO UPDATE SET name = EXCLUDED.name
+                RETURNING push_id;
+            """
+            self.cursor.execute(q_push_type, (method_name,))
+            push_id = self.cursor.fetchone()[0]
+            
+            time_data = [(push_id, t) for t in times]
+            
+            q_times = f"""
+                INSERT INTO {self.time_table} (push_id, time)s
+                VALUES (%s, %s);
+            """
+            self.cursor.executemany(q_times, time_data)
+            
+            self.conn.commit()
+            print(f"Sauvegarde réussie en DB pour : {method_name}")
+            
+        except Exception as e:
+            self.conn.rollback()
+            print(f"Erreur lors de la sauvegarde en DB : {e}")
     
 
 class DataBaseCreator:
     def __init__(self, db: DataBase):
         self.db = db
         
-    def create_test_table(self):
+    def create_all_tables(self):
+        self.__create_test_table()
+        self.__create_time_tables()
+        self.db.conn.commit()
+        
+        
+    def __create_test_table(self):
         q = f"""
         CREATE TABLE IF NOT EXISTS {self.db.test_table} (
             number INTEGER,
@@ -65,5 +97,22 @@ class DataBaseCreator:
         """
         
         self.db.cursor.execute(q)
-        self.db.conn.commit()
     
+    def __create_time_tables(self):
+        q_names = f"""
+        CREATE TABLE IF NOT EXISTS {self.db.push_type_table} (
+            push_id SERIAL PRIMARY KEY,
+            name VARCHAR(60) UNIQUE
+        )
+        """
+        
+        q_times = f"""
+        CREATE TABLE IF NOT EXISTS {self.db.time_table} (
+            time_id SERIAL PRIMARY KEY,
+            push_id INTEGER REFERENCES {self.db.push_type_table} (push_id) ON DELETE CASCADE,
+            time NUMERIC(20,16)
+        )
+        """
+        
+        self.db.cursor.execute(q_names)
+        self.db.cursor.execute(q_times)

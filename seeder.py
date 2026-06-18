@@ -3,19 +3,20 @@ import random
 
 class Seeder:
     
+    def __init__(self):
+        self.fake = Faker('fr_FR')
+        Faker.seed(0)
+    
     def __seed(self, nb: int) -> list[tuple]:
         if not isinstance(nb, int):
             raise ValueError("nb must be a number")
         
-        fake = Faker('fr_FR')
-        Faker.seed(0)
-        
         data = []
         
         for _ in range(nb):
-            integer = fake.random_int(min=1, max=100000)
-            text = fake.sentence(nb_words=5)
-            date = fake.date_this_century()
+            integer = self.fake.random_int(min=1, max=100000)
+            text = self.fake.sentence(nb_words=5)
+            date = self.fake.date_this_century()
             float = round(random.uniform(10.0, 999.9), 2)
             
             data.append((integer, text, date, float))
@@ -26,7 +27,7 @@ class Seeder:
         return self.__seed(1000)
     
     def create_hundred_thousand(self):
-        return self.__seed(100000)
+        return self.create_thousand() * 100
     
     def create_million(self):
-        return self.__seed(1000000)
+        return self.create_thousand() * 1000
