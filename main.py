@@ -19,6 +19,7 @@ ht_data = seeder.create_hundred_thousand()
 million_data = seeder.create_million()
 
 def main():
+    db.reset_table()
     push_thousand_naive()
     push_thousand_naive_transaction()    
     push_execute_many()
@@ -37,8 +38,8 @@ def push_thousand_naive():
     
 def push_thousand_naive_transaction():
     times = []
-    db.reset_table()
     for _ in range(0, 10):
+        db.reset_table()
         with Counter() as count:
             db_pusher.push_naive_version(thousand_data)   
         times.append(count.elapsed)
@@ -48,8 +49,8 @@ def push_thousand_naive_transaction():
 def push_execute_many():
     print("Executemany 1k")
     times_1k = []
-    db.reset_table()
     for _ in range(10):
+        db.reset_table() 
         with Counter() as count:
             db_pusher.push_executemany_version(thousand_data)
         times_1k.append(count.elapsed)
@@ -57,8 +58,8 @@ def push_execute_many():
 
     print("Executemany 100k")
     times_100k = []
-    db.reset_table()
     for _ in range(10):
+        db.reset_table()
         with Counter() as count:
             db_pusher.push_executemany_version(ht_data)
         times_100k.append(count.elapsed)
@@ -66,8 +67,8 @@ def push_execute_many():
 
     print("Executemany 1M")
     times_1m = []
-    db.reset_table()
     for _ in range(10):
+        db.reset_table()
         with Counter() as count:
             db_pusher.push_executemany_version(million_data)
         times_1m.append(count.elapsed)
@@ -77,8 +78,8 @@ def push_execute_many():
 def push_execute_batches():
     print("Execute_batch 1k page_size=100")
     times_1k = []
-    db.reset_table()
     for _ in range(10):
+        db.reset_table()
         with Counter() as count:
             db_pusher.push_execute_batch_version(thousand_data, page_size=100)
         times_1k.append(count.elapsed)
@@ -86,8 +87,8 @@ def push_execute_batches():
 
     print("Execute_batch 100k page_size=1000")
     times_100k_moyen = []
-    db.reset_table()
     for _ in range(10):
+        db.reset_table()
         with Counter() as count:
             db_pusher.push_execute_batch_version(ht_data, page_size=1000)
         times_100k_moyen.append(count.elapsed)
@@ -95,8 +96,8 @@ def push_execute_batches():
 
     print("Execute_batch 100k page_size=10 000")
     times_100k_gros = []
-    db.reset_table()
     for _ in range(10):
+        db.reset_table()
         with Counter() as count:
             db_pusher.push_execute_batch_version(ht_data, page_size=10000)
         times_100k_gros.append(count.elapsed)
@@ -104,8 +105,8 @@ def push_execute_batches():
 
     print("Execute_batch 1M (page_size=10 000)")
     times_1m = []
-    db.reset_table()
     for _ in range(10):
+        db.reset_table()
         with Counter() as count:
             db_pusher.push_execute_batch_version(million_data, page_size=10000)
         times_1m.append(count.elapsed)
@@ -115,8 +116,8 @@ def push_execute_batches():
 def push_execute_values():
     print("Execute_values 1k (page_size=100)")
     times_1k = []
-    db.reset_table()
     for _ in range(10):
+        db.reset_table()
         with Counter() as count:
             db_pusher.push_execute_values_version(thousand_data, page_size=100)
         times_1k.append(count.elapsed)
@@ -124,8 +125,8 @@ def push_execute_values():
 
     print("Execute_values 100k (page_size=1000)")
     times_100k_moyen = []
-    db.reset_table()
     for _ in range(10):
+        db.reset_table()
         with Counter() as count:
             db_pusher.push_execute_values_version(ht_data, page_size=1000)
         times_100k_moyen.append(count.elapsed)
@@ -133,8 +134,8 @@ def push_execute_values():
 
     print("Execute_values 100k (page_size=10000)")
     times_100k_gros = []
-    db.reset_table()
     for _ in range(10):
+        db.reset_table()
         with Counter() as count:
             db_pusher.push_execute_values_version(ht_data, page_size=10000)
         times_100k_gros.append(count.elapsed)
@@ -142,8 +143,8 @@ def push_execute_values():
 
     print("Execute_values 1M (page_size=10000)")
     times_1m = []
-    db.reset_table()
     for _ in range(10):
+        db.reset_table()
         with Counter() as count:
             db_pusher.push_execute_values_version(million_data, page_size=10000)
         times_1m.append(count.elapsed)
