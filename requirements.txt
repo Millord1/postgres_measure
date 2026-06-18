@@ -3,3 +3,5 @@ Faker >= 40.0.0
 python-dotenv>=1.2.2
 sqlalchemy>=2.0.51
 pandas>=3.0.3
+numpy>=2.3.4
+matplotlib>=3.10.0

@@ -6,10 +6,8 @@ class DataBase:
     time_table = "time"
     push_type_table = "push_type"
     
-    def __init__(self, db_name: str, user: str, pw: str):
-        self.db_name = db_name
-        self.user = user
-        self.pw = pw
+    def __init__(self, db_config):
+        self.db_config = db_config
         self.__check_database()
         
     def __check_database(self):
@@ -25,23 +23,15 @@ class DataBase:
         self.__connect()
         
     def __connect_without_db(self):
-        self.conn = psycopg2.connect(
-            user=self.user, 
-            password=self.pw, 
-            host="localhost", 
-            port="5432"
-        )
+        conn_conf = self.db_config.copy()
+        conn_conf.pop('dbname', None)
+        
+        self.conn = psycopg2.connect(**conn_conf)
         self.conn.autocommit = True
         self.cursor = self.conn.cursor()
         
     def __connect(self):
-        self.conn = psycopg2.connect(
-            dbname=self.db_name, 
-            user=self.user, 
-            password=self.pw, 
-            host="localhost", 
-            port="5432"
-        )
+        self.conn = psycopg2.connect(**self.db_config)
         self.cursor = self.conn.cursor()
         
     def reset_table(self):

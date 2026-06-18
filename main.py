@@ -3,13 +3,22 @@ from perf_counter import Counter
 from database_push import DatabasePusher
 from seeder import Seeder
 from memory_tracker import MemoryTracker
+from plot_results import GraphGenerator
+import random
+from dotenv import load_dotenv
+import os
 
+load_dotenv()
 
-PW = "Millord!"
-USER = "postgres"
-DB_NAME = "test"
+db_config = {
+    "host": "localhost",
+    "port": 5432,
+    "dbname": os.getenv("DB_NAME", "test"),
+    "user": os.getenv("USER", "postgres"),
+    "password": os.getenv("PW"),
+}
 
-db = DataBase(DB_NAME, USER, PW)
+db = DataBase(db_config)
 db_creator = DataBaseCreator(db)
 db_creator.create_all_tables()
 
@@ -20,8 +29,11 @@ thousand_data = seeder.create_thousand()
 ht_data = seeder.create_hundred_thousand()
 million_data = seeder.create_million()
 
+graph_generator = GraphGenerator(db)
+
 def main():
-    db.reset_table()
+    
+    # db.reset_table()
     # push_thousand_naive()
     # push_thousand_naive_transaction()    
     # push_execute_many()
@@ -29,9 +41,12 @@ def main():
     # push_copy_expert()
     # push_pandas_defaut()
     # push_pandas_multi()
-    push_pandas_callable_copy()
-    push_copy_from_tuple()
+    # push_pandas_callable_copy()
+    # push_copy_from_tuple()
     # push_copy_stream_benchmark()
+    # push_copy_stream_benchmark_no_faker()
+    
+    graph_generator.generate_filtered_plots()
 
 
 def push_thousand_naive():
@@ -287,15 +302,43 @@ def push_copy_from_tuple():
     
     
 
-
+# Plus long à cause de Faker
+# Plus léger en RAM 
+# (ne se voit pas sur cette mesure car le cout de la génération Faker n'apparait pas ici)
 def push_copy_stream_benchmark():
-    times_1m = []
     
+    print("COPY from tuple 1M")
+    times_1m = []
     for i in range(10):
         db.reset_table()
-        faker_generator = seeder.create_million_on_stream()
-        
         with MemoryTracker() as ram, Counter() as count:
+            million_data_bis = seeder.create_million()
+            db_pusher.push_copy_stream_version(million_data_bis)
+            
+        times_1m.append(count.elapsed)
+        print(f"{count.elapsed:.4f}s | RAM = {ram.peak_mo:.2f} Mo")
+    db.save_times_to_db("COPY Stream Tuple 1M", times_1m)
+    
+    print("COPY from stream 1M")
+    times_1m = []
+    for i in range(10):
+        db.reset_table()
+        with MemoryTracker() as ram, Counter() as count:
+            faker_generator = seeder.create_million_on_stream()
+            db_pusher.push_copy_stream_version(faker_generator)
+            
+        times_1m.append(count.elapsed)
+        print(f"{count.elapsed:.4f}s | RAM = {ram.peak_mo:.2f} Mo")
+        
+    db.save_times_to_db("COPY Stream Faker 1M", times_1m)
+    
+def push_copy_stream_benchmark_no_faker():
+    print("COPY from stream 1M Without Faker")
+    times_1m = []
+    for i in range(10):
+        db.reset_table()
+        with MemoryTracker() as ram, Counter() as count:
+            faker_generator = generate_pure_python_stream()
             db_pusher.push_copy_stream_version(faker_generator)
             
         times_1m.append(count.elapsed)
@@ -303,5 +346,13 @@ def push_copy_stream_benchmark():
         
     db.save_times_to_db("COPY Stream Faker 1M", times_1m)
 
+def generate_pure_python_stream(n: int):
+    for i in range(n):
+        yield (
+            i,
+            f"Texte rapide numero {i}",
+            "2026-06-18", 
+            round(random.uniform(10.0, 999.9), 2)
+        )
     
 main()
