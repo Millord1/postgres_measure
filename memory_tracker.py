@@ -6,6 +6,6 @@ class MemoryTracker:
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        current, peak = tracemalloc.get_traced_memory()
+        _, peak = tracemalloc.get_traced_memory()
         tracemalloc.stop()
         self.peak_mo = peak / (1024 * 1024)

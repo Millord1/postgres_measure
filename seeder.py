@@ -31,3 +31,20 @@ class Seeder:
     
     def create_million(self):
         return self.create_thousand() * 1000
+    
+    # For the Science
+    
+    def __seed_on_stream(self, nb: int):
+        if not isinstance(nb, int):
+            raise ValueError("nb must be a number")
+        
+        for _ in range(nb):
+            yield (
+                self.fake.random_int(min=1, max=100000), 
+                self.fake.sentence(nb_words=5), 
+                self.fake.date_this_century(), 
+                round(random.uniform(10.0, 999.9), 2)
+            )
+    
+    def create_million_on_stream(self):
+        return self.__seed_on_stream(1000000)
