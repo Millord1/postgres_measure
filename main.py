@@ -1,28 +1,33 @@
-from database import DataBase, DataBaseCreator
-from perf_counter import Counter
-from database_push import DatabasePusher
-from seeder import Seeder
-from memory_tracker import MemoryTracker
-from plot_results import GraphGenerator
-import random
-from dotenv import load_dotenv
 import os
+from os.path import join, dirname
+from dotenv import load_dotenv
+import random
+from database import DataBase, DataBaseCreator
+from database_push import DatabasePusher
+from memory_tracker import MemoryTracker
+from perf_counter import Counter
+from plot_results import GraphGenerator
+from seeder import Seeder
 
-load_dotenv()
+dotenv_path = join(dirname(__file__), '.env')
+load_dotenv(dotenv_path)
 
 db_config = {
-    "host": "localhost",
-    "port": 5432,
-    "dbname": os.getenv("DB_NAME", "test"),
-    "user": os.getenv("USER", "postgres"),
-    "password": os.getenv("PW"),
+    "host": os.environ.get("DB_HOST", "localhost"),
+    "port": int(os.environ.get("DB_PORT", 5432)),
+    "dbname": os.environ.get("DB_NAME"),
+    "user": os.environ.get("DB_USER"),
+    "password": os.environ.get("PW"),
 }
+
+if not all([db_config["dbname"], db_config["user"], db_config["password"]]):
+    raise ValueError()
 
 db = DataBase(db_config)
 db_creator = DataBaseCreator(db)
 db_creator.create_all_tables()
 
-db_pusher= DatabasePusher(db)
+db_pusher = DatabasePusher(db)
 seeder = Seeder()
 
 thousand_data = seeder.create_thousand()
@@ -31,8 +36,8 @@ million_data = seeder.create_million()
 
 graph_generator = GraphGenerator(db)
 
+
 def main():
-    
     # db.reset_table()
     # push_thousand_naive()
     # push_thousand_naive_transaction()    
@@ -45,7 +50,6 @@ def main():
     # push_copy_from_tuple()
     # push_copy_stream_benchmark()
     # push_copy_stream_benchmark_no_faker()
-    
     graph_generator.generate_filtered_plots()
 
 
@@ -137,7 +141,6 @@ def push_execute_batches():
     
     
 def push_copy_expert():
-    
     print("COPY Expert 1k")
     times_1k = []
     for _ in range(10):
@@ -186,7 +189,7 @@ def push_pandas_defaut():
         db.reset_table()
         with MemoryTracker() as ram, Counter() as count:
             db_pusher.push_pandas_native_version(ht_data)
-        times_1k.append(count.elapsed)
+        times_100k.append(count.elapsed)
         print(f"{count.elapsed:.4f}s | Pic RAM = {ram.peak_mo:.2f} Mo")
     db.save_times_to_db("Pandas Default 100k", times_100k)
     
@@ -196,13 +199,12 @@ def push_pandas_defaut():
         db.reset_table()
         with MemoryTracker() as ram, Counter() as count:
             db_pusher.push_pandas_native_version(million_data)
-        times_1k.append(count.elapsed)
+        times_1m.append(count.elapsed)
         print(f"{count.elapsed:.4f}s | Pic RAM = {ram.peak_mo:.2f} Mo")
     db.save_times_to_db("Pandas Default 1M", times_1m)
     
     
 def push_pandas_multi():
-
     print("Pandas to_sql (Multi + chunksize=1000) 1k")
     times_1k_multi = []
     for i in range(10):
@@ -236,14 +238,14 @@ def push_pandas_multi():
     
 def push_pandas_callable_copy():
     print("Pandas to_sql (Callable COPY) 1k")
-    times_100k = []
+    times_1k = []
     for i in range(10):
         db.reset_table()
         with MemoryTracker() as ram, Counter() as count:
             db_pusher.push_pandas_copy_version(thousand_data, chunksize=100)
-        times_100k.append(count.elapsed)
+        times_1k.append(count.elapsed)
         print(f"{count.elapsed:.4f}s | Pic RAM = {ram.peak_mo:.2f} Mo")
-    db.save_times_to_db("Pandas Callable COPY 1k", times_100k)
+    db.save_times_to_db("Pandas Callable COPY 1k", times_1k)
     
     print("Pandas to_sql (Callable COPY) 100k")
     times_100k = []
@@ -273,7 +275,6 @@ def push_copy_from_tuple():
         db.reset_table()
         with MemoryTracker() as ram, Counter() as count:
             db_pusher.push_copy_stream_version(thousand_data)
-            
         times_1k.append(count.elapsed)
         print(f"{count.elapsed:.4f}s | RAM = {ram.peak_mo:.2f} Mo")
     db.save_times_to_db("COPY Stream Tuple 1k", times_1k)
@@ -284,7 +285,6 @@ def push_copy_from_tuple():
         db.reset_table()
         with MemoryTracker() as ram, Counter() as count:
             db_pusher.push_copy_stream_version(ht_data)
-            
         times_100k.append(count.elapsed)
         print(f"{count.elapsed:.4f}s | RAM = {ram.peak_mo:.2f} Mo")
     db.save_times_to_db("COPY Stream Tuple 100k", times_100k)
@@ -295,42 +295,34 @@ def push_copy_from_tuple():
         db.reset_table()
         with MemoryTracker() as ram, Counter() as count:
             db_pusher.push_copy_stream_version(million_data)
-            
         times_1m.append(count.elapsed)
         print(f"{count.elapsed:.4f}s | RAM = {ram.peak_mo:.2f} Mo")
     db.save_times_to_db("COPY Stream Tuple 1M", times_1m)
     
     
-
-# Plus long à cause de Faker
-# Plus léger en RAM 
-# (ne se voit pas sur cette mesure car le cout de la génération Faker n'apparait pas ici)
 def push_copy_stream_benchmark():
-    
     print("COPY from tuple 1M")
-    times_1m = []
+    times_1m_tuple = []
     for i in range(10):
         db.reset_table()
         with MemoryTracker() as ram, Counter() as count:
             million_data_bis = seeder.create_million()
             db_pusher.push_copy_stream_version(million_data_bis)
-            
-        times_1m.append(count.elapsed)
+        times_1m_tuple.append(count.elapsed)
         print(f"{count.elapsed:.4f}s | RAM = {ram.peak_mo:.2f} Mo")
-    db.save_times_to_db("COPY Stream Tuple 1M", times_1m)
+    db.save_times_to_db("COPY Stream Tuple 1M", times_1m_tuple)
     
     print("COPY from stream 1M")
-    times_1m = []
+    times_1m_faker = []
     for i in range(10):
         db.reset_table()
         with MemoryTracker() as ram, Counter() as count:
             faker_generator = seeder.create_million_on_stream()
             db_pusher.push_copy_stream_version(faker_generator)
-            
-        times_1m.append(count.elapsed)
+        times_1m_faker.append(count.elapsed)
         print(f"{count.elapsed:.4f}s | RAM = {ram.peak_mo:.2f} Mo")
-        
-    db.save_times_to_db("COPY Stream Faker 1M", times_1m)
+    db.save_times_to_db("COPY Stream Faker 1M", times_1m_faker)
+    
     
 def push_copy_stream_benchmark_no_faker():
     print("COPY from stream 1M Without Faker")
@@ -338,13 +330,12 @@ def push_copy_stream_benchmark_no_faker():
     for i in range(10):
         db.reset_table()
         with MemoryTracker() as ram, Counter() as count:
-            faker_generator = generate_pure_python_stream()
-            db_pusher.push_copy_stream_version(faker_generator)
-            
+            pure_generator = generate_pure_python_stream(1000000)
+            db_pusher.push_copy_stream_version(pure_generator)
         times_1m.append(count.elapsed)
         print(f"{count.elapsed:.4f}s | RAM = {ram.peak_mo:.2f} Mo")
-        
-    db.save_times_to_db("COPY Stream Faker 1M", times_1m)
+    db.save_times_to_db("COPY Stream Pure Python 1M", times_1m)
+
 
 def generate_pure_python_stream(n: int):
     for i in range(n):
@@ -354,5 +345,7 @@ def generate_pure_python_stream(n: int):
             "2026-06-18", 
             round(random.uniform(10.0, 999.9), 2)
         )
-    
-main()
+
+
+if __name__ == "__main__":
+    main()

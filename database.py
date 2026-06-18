@@ -12,11 +12,11 @@ class DataBase:
         
     def __check_database(self):
         self.__connect_without_db()
-        self.cursor.execute(f"SELECT 1 FROM pg_catalog.pg_database WHERE datname = '{self.db_name}';")
+        self.cursor.execute(f"SELECT 1 FROM pg_catalog.pg_database WHERE datname = '{self.db_config['dbname']}';")
         exists = self.cursor.fetchone()
 
         if not exists:
-            self.cursor.execute(f"CREATE DATABASE {self.db_name};")
+            self.cursor.execute(f"CREATE DATABASE {self.db_config['dbname']};")
             
         self.cursor.close()
         self.conn.close()

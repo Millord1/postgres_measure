@@ -35,7 +35,6 @@ class GraphGenerator:
     def generate_filtered_plots(self):
         
         data_by_method = self._get_data_by_method()
-
         self._create_chart(
             data_by_method,
             "Évolution du Temps Cumulé - Toutes les méthodes (Max 10 itérations)",
@@ -43,7 +42,6 @@ class GraphGenerator:
         )
 
         top_performers = self._get_top_performers(data_by_method)
-
         self._create_chart(
             top_performers,
             f"L'Élite - Uniquement les méthodes rapides (< {self.top_perf}s au cumul)",
@@ -52,12 +50,15 @@ class GraphGenerator:
         
     def _get_data_by_method(self):
         data_by_method = {}
+        
         for method_name, exec_time in self.rows:
             if method_name not in data_by_method:
                 data_by_method[method_name] = []
-
-            if len(data_by_method[method_name]) < 10:
-                data_by_method[method_name].append(float(exec_time))
+            data_by_method[method_name].append(float(exec_time))
+        
+        for method_name in data_by_method:
+            data_by_method[method_name] = data_by_method[method_name][-10:]
+            
         return data_by_method
     
     def _get_top_performers(self, data_by_method):
