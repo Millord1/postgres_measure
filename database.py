@@ -63,7 +63,7 @@ class DataBase:
             time_data = [(push_id, t) for t in times]
             
             q_times = f"""
-                INSERT INTO {self.time_table} (push_id, time)s
+                INSERT INTO {self.time_table} (push_id, time)
                 VALUES (%s, %s);
             """
             self.cursor.executemany(q_times, time_data)
