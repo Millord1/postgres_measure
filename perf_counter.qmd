@@ -1,11 +1,10 @@
-# ---
-# title: "Perf Counter as Context Manager"
-# author: Millord
-# format: html
-# ---
-# %%
-#| eval: false
+---
+title: "Mesure du temps de chaque push"
+---
 
+Le script de mesure du temps en Context Manager
+
+```python
 from time import perf_counter
 
 class Counter:
@@ -17,3 +16,4 @@ class Counter:
         self.end = perf_counter()
         self.elapsed = self.end - self.start
         return self.elapsed
+```

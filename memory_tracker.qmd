@@ -1,11 +1,10 @@
-# ---
-# title: "Memory tracker as Context Manager"
-# author: Millord
-# format: html
-# ---
-# %%
-#| eval: false
+---
+title: "Mesure de la mémoire RAM utilisée"
+---
 
+Le script de mesure de la RAM en Context Manager
+
+```python
 import tracemalloc
 
 class MemoryTracker:
@@ -17,3 +16,4 @@ class MemoryTracker:
         _, peak = tracemalloc.get_traced_memory()
         tracemalloc.stop()
         self.peak_mo = peak / (1024 * 1024)
+```

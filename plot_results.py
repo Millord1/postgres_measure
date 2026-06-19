@@ -1,8 +1,14 @@
+# ---
+# title: "Generate graphs but not that good"
+# author: Millord
+# format: html
+# ---
+# %%
 import os
 import matplotlib.pyplot as plt
 import numpy as np
 from database import DataBase
-
+# %%
 class GraphGenerator:
     
     def __init__(self, db: DataBase, top_perf: int = 500):

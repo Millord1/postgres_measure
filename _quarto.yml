@@ -1,0 +1,44 @@
+project:
+  type: website
+
+website:
+  title: "Postgres methods measurment"
+  sidebar:
+    style: "docked"
+    search: true
+    contents:
+      - href: index.qmd
+        text: Home
+
+      - section: "Analyses"
+        contents:
+        - href: git_project_insertion.ipynb
+          text: "Génération de graphiques d'analyse"
+
+      - section: "Database"
+        contents:
+        - href: database_push.qmd
+          text: "Gère les push en database"
+
+      - section: "Mesures"
+        contents:
+        - href: memory_tracker.qmd
+          text: "Mesure mémoire en Context Manager"
+        - href: perf_counter.qmd
+          text: "Mesure le temps des push, en Context Manager"
+
+      - section: "Rendu"
+        contents:
+        - href: analyse.md
+          text: "Analyse des résultats"
+
+format:
+  html:
+    theme: cosmo
+    css: styles.css
+    toc: true
+    code-fold: true
+    code-summary: "Voir le code source"
+
+
+

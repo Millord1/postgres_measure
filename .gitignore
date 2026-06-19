@@ -2,3 +2,5 @@ env
 .env
 plots/*
 plot_results.py
+/env/
+/.quarto/

@@ -1,5 +1,15 @@
+# ---
+# title: "Seeder, create fake data"
+# author: Millord
+# format: html
+# ---
+# %%
+#| eval: false
+
 from faker import Faker
 import random
+# %%
+#| eval: false
 
 class Seeder:
     

@@ -1,3 +1,9 @@
+# ---
+# title: "Analyse des performances Postgres, main"
+# author: Millord
+# format: html
+# ---
+
 import os
 from os.path import join, dirname
 from dotenv import load_dotenv
@@ -33,23 +39,28 @@ million_data = seeder.create_million()
 
 graph_generator = GraphGenerator(db)
 
+# %%
+#| eval: false
+
 def main():
-    # db.reset_table()
-    # push_thousand_naive()
-    # push_thousand_naive_transaction()    
-    # push_execute_many()
-    # push_execute_batches()
-    # push_execute_values()
-    # push_copy_expert()
-    # push_pandas_defaut()
-    # push_pandas_multi()
-    # push_pandas_callable_copy()
-    # push_copy_from_tuple()
-    # push_copy_stream_benchmark()
-    # push_copy_stream_benchmark_no_faker()
+    db.reset_table()
+    push_thousand_naive()
+    push_thousand_naive_transaction()    
+    push_execute_many()
+    push_execute_batches()
+    push_execute_values()
+    push_copy_expert()
+    push_pandas_defaut()
+    push_pandas_multi()
+    push_pandas_callable_copy()
+    push_copy_from_tuple()
+    push_copy_stream_benchmark()
+    push_copy_stream_benchmark_no_faker()
     
     graph_generator.generate_focused_comparison_plot()
 
+# %%
+#| eval: false
 
 def push_thousand_naive():
     times = []
@@ -69,7 +80,10 @@ def push_thousand_naive_transaction():
             db_pusher.push_naive_version(thousand_data)   
         times.append(count.elapsed)
     db.save_times_to_db('thousand_unique', times)
-    
+
+# %%
+#| eval: false
+
     
 def push_execute_many():
     print("Executemany 1k")
@@ -165,6 +179,9 @@ def push_execute_batches():
         times_1m.append(count.elapsed)
     db.save_times_to_db("Execute_batch 1M (page_size=10000)", times_1m)
     
+# %%
+#| eval: false
+
     
 def push_copy_expert():
     print("COPY Expert 1k")
@@ -261,6 +278,9 @@ def push_pandas_multi():
         print(f"{count.elapsed:.4f}s | Pic RAM = {ram.peak_mo:.2f} Mo")
     db.save_times_to_db("Pandas Multi 1M", times_1m_multi)
     
+# %%
+#| eval: false
+
     
 def push_pandas_callable_copy():
     print("Pandas to_sql (Callable COPY) 1k")
@@ -325,7 +345,10 @@ def push_copy_from_tuple():
         print(f"{count.elapsed:.4f}s | RAM = {ram.peak_mo:.2f} Mo")
     db.save_times_to_db("COPY Stream Tuple 1M", times_1m)
     
-    
+# %%
+#| eval: false
+
+
 def push_copy_stream_benchmark():
     print("COPY from tuple 1M")
     times_1m_tuple = []
@@ -349,7 +372,7 @@ def push_copy_stream_benchmark():
         print(f"{count.elapsed:.4f}s | RAM = {ram.peak_mo:.2f} Mo")
     db.save_times_to_db("COPY Stream Faker 1M", times_1m_faker)
     
-    
+
 def push_copy_stream_benchmark_no_faker():
     print("COPY from stream 1M Without Faker")
     times_1m = []

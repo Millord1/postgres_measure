@@ -1,3 +1,12 @@
+# ---
+# title: "Gestion de la base de données"
+# author: Millord
+# format: html
+# ---
+
+# %%
+#| eval: false
+
 import psycopg2
 
 class DataBase:
@@ -65,7 +74,7 @@ class DataBase:
             self.conn.rollback()
             print(f"Erreur lors de la sauvegarde en DB : {e}")
     
-
+# %%
 class DataBaseCreator:
     def __init__(self, db: DataBase):
         self.db = db
