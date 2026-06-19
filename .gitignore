@@ -1,3 +1,4 @@
 env
 .env
-data/*
+plots/*
+plot_results.py

@@ -1,5 +1,5 @@
 from database import DataBase
-from psycopg2.extras import execute_batch
+from psycopg2.extras import execute_batch, execute_values
 import io
 import pandas as pd
 from sqlalchemy import create_engine
@@ -32,6 +32,14 @@ class DatabasePusher:
             VALUES (%s, %s, %s, %s)
         """
         self.db.cursor.executemany(q, data)
+        self.db.conn.commit()
+        
+    def push_execute_values_version(self, data: list[tuple], page_size: int = 1000):
+        q = f"""
+            INSERT INTO {self.db.test_table} (number, texte, date, decimal) 
+            VALUES %s
+        """
+        execute_values(self.db.cursor, q, data, page_size=page_size)
         self.db.conn.commit()
         
     def push_execute_batch_version(self, data: list[tuple], page_size: int = 1000):

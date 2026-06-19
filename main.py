@@ -33,13 +33,13 @@ million_data = seeder.create_million()
 
 graph_generator = GraphGenerator(db)
 
-
 def main():
     # db.reset_table()
     # push_thousand_naive()
     # push_thousand_naive_transaction()    
     # push_execute_many()
     # push_execute_batches()
+    # push_execute_values()
     # push_copy_expert()
     # push_pandas_defaut()
     # push_pandas_multi()
@@ -47,7 +47,8 @@ def main():
     # push_copy_from_tuple()
     # push_copy_stream_benchmark()
     # push_copy_stream_benchmark_no_faker()
-    graph_generator.generate_filtered_plots()
+    
+    graph_generator.generate_focused_comparison_plot()
 
 
 def push_thousand_naive():
@@ -97,6 +98,34 @@ def push_execute_many():
             db_pusher.push_executemany_version(million_data)
         times_1m.append(count.elapsed)
     db.save_times_to_db("Executemany 1M", times_1m)
+    
+def push_execute_values():
+    print("Execute_values 1k")
+    times_1k = []
+    for _ in range(10):
+        db.reset_table() 
+        with Counter() as count:
+            db_pusher.push_execute_values_version(thousand_data)
+        times_1k.append(count.elapsed)
+    db.save_times_to_db("Execute_values 1k", times_1k)
+
+    print("Execute_values 100k")
+    times_100k = []
+    for _ in range(10):
+        db.reset_table()
+        with Counter() as count:
+            db_pusher.push_execute_values_version(ht_data)
+        times_100k.append(count.elapsed)
+    db.save_times_to_db("Execute_values 100k", times_100k)
+
+    print("Execute_values 1M")
+    times_1m = []
+    for _ in range(10):
+        db.reset_table()
+        with Counter() as count:
+            db_pusher.push_execute_values_version(million_data)
+        times_1m.append(count.elapsed)
+    db.save_times_to_db("Execute_values 1M", times_1m)
     
     
 def push_execute_batches():
