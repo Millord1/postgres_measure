@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.555">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Postgres methods measurment</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-sidebar docked">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item">
+      Postgres methods measurment
+      </li></ol></nav>
+        <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Postgres methods measurment</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Home</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">
+ <span class="menu-text">Analyses</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./git_project_insertion.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Génération de graphiques d’analyse</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true">
+ <span class="menu-text">Database</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./database_push.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Gère les push en database</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true">
+ <span class="menu-text">Mesures</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./memory_tracker.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Mesure mémoire en Context Manager</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./perf_counter.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Mesure le temps des push, en Context Manager</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true">
+ <span class="menu-text">Rendu</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./analyse.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Analyse des résultats</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#brief-insérer-des-données" id="toc-brief-insérer-des-données" class="nav-link active" data-scroll-target="#brief-insérer-des-données">Brief : insérer des données</a>
+  <ul class="collapse">
+  <li><a href="#situation-professionnelle-emblématique" id="toc-situation-professionnelle-emblématique" class="nav-link" data-scroll-target="#situation-professionnelle-emblématique">Situation professionnelle emblématique</a></li>
+  <li><a href="#préparer-le-jeu-de-données-et-la-table" id="toc-préparer-le-jeu-de-données-et-la-table" class="nav-link" data-scroll-target="#préparer-le-jeu-de-données-et-la-table">1. Préparer le jeu de données et la table</a></li>
+  <li><a href="#les-méthodes-à-comparer" id="toc-les-méthodes-à-comparer" class="nav-link" data-scroll-target="#les-méthodes-à-comparer">2. Les méthodes à comparer</a></li>
+  <li><a href="#le-protocole-de-mesure" id="toc-le-protocole-de-mesure" class="nav-link" data-scroll-target="#le-protocole-de-mesure">3. Le protocole de mesure</a></li>
+  <li><a href="#restituer-les-résultats" id="toc-restituer-les-résultats" class="nav-link" data-scroll-target="#restituer-les-résultats">4. Restituer les résultats</a></li>
+  <li><a href="#livrables" id="toc-livrables" class="nav-link" data-scroll-target="#livrables">Livrables</a></li>
+  <li><a href="#indicateurs-de-performance" id="toc-indicateurs-de-performance" class="nav-link" data-scroll-target="#indicateurs-de-performance">Indicateurs de performance</a></li>
+  <li><a href="#modalités-pédagogiques" id="toc-modalités-pédagogiques" class="nav-link" data-scroll-target="#modalités-pédagogiques">Modalités pédagogiques</a></li>
+  <li><a href="#modalités-dévaluation" id="toc-modalités-dévaluation" class="nav-link" data-scroll-target="#modalités-dévaluation">Modalités d’évaluation</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+
+
+<section id="brief-insérer-des-données" class="level1">
+<h1>Brief : insérer des données</h1>
+<blockquote class="blockquote">
+<p>Le « transvasement » (i.e.&nbsp;l’insertion de lignes depuis Python vers PostgreSQL) peut être réalisé de différentes façons, et avec un facteur d’au moins 100 entre la méthode la plus lente et la méthode plus rapide. L’objectif est ici de comparer différentes méthodes et le temps nécessaire pour leur exécution.</p>
+</blockquote>
+<ul>
+<li>vous allez charger un même jeu de données en base de plusieurs manières</li>
+<li>chronométrer chacune</li>
+<li>expliquer pourquoi les écarts sont aussi grands</li>
+</ul>
+<p><strong>L’enjeu n’est pas d’apprendre la syntaxe par coeur</strong>, mais de comprendre <strong>d’où vient la lenteur</strong> et de savoir choisir la bonne méthode selon le contexte.</p>
+<blockquote class="blockquote">
+<p>Compétence visée (RNCP-37638) : <strong>C11, niveau 1-2</strong> : « créer une base de données […] et <strong>en programmant leur import</strong>. Réinvestissement de C8 (automatisation) et du module numérique responsable (sobriété : un import efficace, c’est moins de CPU et de temps machine).</p>
+</blockquote>
+<section id="situation-professionnelle-emblématique" class="level2">
+<h2 class="anchored" data-anchor-id="situation-professionnelle-emblématique">Situation professionnelle emblématique</h2>
+<ul>
+<li>Vous êtes data engineer et votre script d’ETL charge un fichier de quelques milliers de lignes en base, toutes les nuits.</li>
+<li>Le volume monte : le client passe de 5 000 à 2 millions de lignes par jour. Le chargement, qui prenait 3 secondes, prend maintenant 40 minutes et fait sauter la fenêtre de traitement nocturne.</li>
+<li>On vous demande de <strong>diagnostiquer</strong> et de <strong>réécrire l’étape d’import</strong>, chiffres à l’appui, sans changer le résultat en base.</li>
+</ul>
+<p><strong>⚠️ « Ça marche » n’est pas « ça tient à l’échelle ». La même boucle d’insertion qui passe sur 1 000 lignes peut être inexploitable sur 1 million.</strong></p>
+</section>
+<section id="préparer-le-jeu-de-données-et-la-table" class="level2">
+<h2 class="anchored" data-anchor-id="préparer-le-jeu-de-données-et-la-table">1. Préparer le jeu de données et la table</h2>
+<ul>
+<li>Générez (ou récupérez) un jeu d’au moins <strong>plusieurs colonnes et trois tailles</strong> : 1 000, 100 000 et 1 000 000 de lignes.</li>
+<li>Un <code>DataFrame</code> pandas ou une liste de tuples conviennent.<br>
+</li>
+<li>Variez les types (entier, texte, date, float) pour que ce soit réaliste.</li>
+<li>Créez une table PostgreSQL cible avec ses contraintes.</li>
+<li>Prévoyez un <code>DROP</code>/<code>CREATE</code> (ou <code>TRUNCATE</code>) entre chaque méthode : on repart toujours d’une table vide pour comparer dans des conditions identitques.</li>
+</ul>
+<blockquote class="blockquote">
+<p>🟠 Le générateur de données et la création de table ne doivent pas être chronométrées. On ne mesure que l’insertion.</p>
+</blockquote>
+</section>
+<section id="les-méthodes-à-comparer" class="level2">
+<h2 class="anchored" data-anchor-id="les-méthodes-à-comparer">2. Les méthodes à comparer</h2>
+<p>Implémentez <strong>au minimum les six premières</strong>. Les suivantes sont des bonus pour creuser.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>#</th>
+<th>Méthode</th>
+<th>Idée</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td><code>cursor.execute()</code> dans une boucle <code>for</code>, un <code>commit()</code> par ligne</td>
+<td>la version naïve</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td><code>cursor.execute()</code> dans une boucle <code>for</code>, <strong>un seul</strong> <code>commit()</code> à la fin</td>
+<td>mesurer l’effet de la transaction unique</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td><code>cursor.executemany()</code></td>
+<td>la méthode « évidente » (pourtant assez lente)</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td><code>psycopg2.extras.execute_batch()</code> (jouez sur <code>page_size</code>)</td>
+<td>regroupe les requêtes en paquets</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td><code>psycopg2.extras.execute_values()</code> (jouez sur <code>page_size</code>)</td>
+<td>un seul <code>INSERT</code> à valeurs multiples</td>
+</tr>
+<tr class="even">
+<td>6</td>
+<td><code>COPY</code> via <code>cursor.copy_expert()</code> + <code>StringIO</code></td>
+<td>le chemin rapide de PostgreSQL</td>
+</tr>
+<tr class="odd">
+<td>7</td>
+<td><code>pandas.to_sql()</code> par défaut</td>
+<td>la facilité (mais pas la plus rapide!!)</td>
+</tr>
+<tr class="even">
+<td>8</td>
+<td><code>pandas.to_sql(method='multi', chunksize=...)</code></td>
+<td>la variante « groupée » de pandas</td>
+</tr>
+<tr class="odd">
+<td>9 💫</td>
+<td><code>pandas.to_sql(method=callable)</code> branché sur <code>COPY</code></td>
+<td>le meilleur des deux mondes</td>
+</tr>
+<tr class="even">
+<td>10 💫</td>
+<td><code>COPY</code> via un itérateur (sans tout charger en mémoire)</td>
+<td>le plus rapide ET le plus sobre en RAM</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>Chaque implémentation doit produire <strong>exactement le même contenu</strong> en base.</li>
+<li>Vérifiez-le par un <code>SELECT count(*)</code> et un contrôle de cohérence après chaque méthode.</li>
+</ul>
+</section>
+<section id="le-protocole-de-mesure" class="level2">
+<h2 class="anchored" data-anchor-id="le-protocole-de-mesure">3. Le protocole de mesure</h2>
+<ul>
+<li>Chronométrez <strong>uniquement</strong> l’insertion, avec <code>time.perf_counter()</code> (pas <code>time.time()</code>).</li>
+<li><strong>Répétez</strong> chaque mesure au moins 10 fois et gardez la médiane : une mesure unique ne vaut rien.</li>
+<li>Faites varier la <strong>taille</strong> (1 k / 100 k / 1 M) : certaines méthodes sont correctes à petite échelle et mais pas à grande échelle.</li>
+<li>Notez aussi, quand vous le pouvez, la <strong>mémoire</strong> consommée (la méthode 6 via <code>StringIO</code> est rapide mais gourmande en RAM ; la méthode 10 corrige ça).</li>
+</ul>
+</section>
+<section id="restituer-les-résultats" class="level2">
+<h2 class="anchored" data-anchor-id="restituer-les-résultats">4. Restituer les résultats</h2>
+<ul>
+<li>Un <strong>tableau</strong> récapitulatif : méthode × taille -&gt; temps médian (et mémoire si mesurée).</li>
+<li>Un <strong>graphique</strong> (matplotlib) temps en fonction de la taille (échelle log utile vu les écarts)</li>
+<li>Une <strong>analyse écrite</strong> : pourquoi ces écarts de temps ?</li>
+</ul>
+<p>Ordres de grandeur observés dans la littérature (benchmark de référence, ~32 000 lignes, à titre indicatif, vos chiffres dépendront de votre machine) :</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Méthode</th>
+<th>Temps relatif</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>insertion ligne par ligne</td>
+<td>≈ 128 s</td>
+</tr>
+<tr class="even">
+<td><code>executemany()</code></td>
+<td>≈ 125 s (à peine mieux : ça reste un <code>INSERT</code> par ligne)</td>
+</tr>
+<tr class="odd">
+<td><code>execute_batch()</code></td>
+<td>≈ 2,5 à 4 s</td>
+</tr>
+<tr class="even">
+<td><code>execute_values()</code></td>
+<td>≈ 1,5 à 3,7 s</td>
+</tr>
+<tr class="odd">
+<td><code>COPY</code> (StringIO / itérateur)</td>
+<td>≈ 0,5 à 0,6 s</td>
+</tr>
+</tbody>
+</table>
+<blockquote class="blockquote">
+<p>🔴 Ces chiffres sont une indication, et en aucun cas une cible !! On attend <strong>vos</strong> mesures, sur <strong>votre</strong> machine, avec le constat de l’écart et son explication.</p>
+</blockquote>
+</section>
+<section id="livrables" class="level2">
+<h2 class="anchored" data-anchor-id="livrables">Livrables</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Livrable</th>
+<th>Forme</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Le script de génération et de création de table</td>
+<td><code>.py</code> ou notebook</td>
+</tr>
+<tr class="even">
+<td>Les implémentations des méthodes</td>
+<td>une fonction par méthode</td>
+</tr>
+<tr class="odd">
+<td>Le tableau et le graphique des temps</td>
+<td>dans le notebook ou un <code>.md</code></td>
+</tr>
+<tr class="even">
+<td>L’analyse écrite des écarts</td>
+<td>quelques paragraphes : round-trips, transaction, COPY</td>
+</tr>
+</tbody>
+</table>
+<p>Le tout versionné dans le dépôt <code>simplon-de-indiv</code>.</p>
+</section>
+<section id="indicateurs-de-performance" class="level2">
+<h2 class="anchored" data-anchor-id="indicateurs-de-performance">Indicateurs de performance</h2>
+<ul>
+<li>au moins six méthodes implémentées et <strong>fonctionnellement équivalentes</strong> (même contenu final en base, vérifié) ;</li>
+<li>le protocole de mesure doit être honnête et valide statistiquement : répétitions, médiane, plusieurs tailles, chronomètre posé au bon endroit (insertion seule) ;</li>
+<li>les résultats sont présentés lisiblement (tableau + graphique) et l’écart de plusieurs ordres de grandeur est constaté ;</li>
+<li>l’analyse identifie correctement la cause (allers-retours serveur, regroupement des requêtes, rôle de la transaction et de <code>COPY</code>) ;</li>
+<li>une recommandation de choix est formulée selon le contexte (petit volume vs gros volume, contraintes mémoire) ;</li>
+<li>votre analyse précisera les liens vers la documentation officielle de chacune des méthodes utilisées</li>
+<li><strong>prise en compte de la sobriété (temps machine, mémoire) en lien avec le module numérique responsable.</strong></li>
+</ul>
+</section>
+<section id="modalités-pédagogiques" class="level2">
+<h2 class="anchored" data-anchor-id="modalités-pédagogiques">Modalités pédagogiques</h2>
+<ul>
+<li>TP technique en présentiel de la phase 2 (ETL et chargement d’entrepôt) et le module numérique responsable</li>
+<li>Travail en binôme, en autonomie accompagnée</li>
+<li>Prérequis : psycopg2 et pandas (semaine 02), SQL et <code>CREATE TABLE</code></li>
+<li>Durée indicative : une demi-journée</li>
+<li>🔴 Aucun usage de LLM pour produire le code des méthodes (le brief n’aurait alors plus aucun intérêt)</li>
+</ul>
+</section>
+<section id="modalités-dévaluation" class="level2">
+<h2 class="anchored" data-anchor-id="modalités-dévaluation">Modalités d’évaluation</h2>
+<ul>
+<li>Le travail est rendu sous forme de commits git.</li>
+<li>Le barème suit les indicateurs ci-dessus :
+<ul>
+<li>couverture et équivalence des méthodes</li>
+<li>sérieux du protocole</li>
+<li>qualité de la restitution</li>
+<li>justesse de l’analyse</li>
+</ul></li>
+</ul>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
